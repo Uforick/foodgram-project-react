@@ -1,9 +1,9 @@
-from rest_framework import serializer
-from .models import User
+from rest_framework import serializers
+from .models import CustomUser
 
 
-class UserSerializer(serializer.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
-        fields = '__all__'
+        model = CustomUser
+        fields = ['username', 'email', 'password', 'first_name', 'last_name']
