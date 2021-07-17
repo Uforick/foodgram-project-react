@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'users',
+    'recipes',
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
