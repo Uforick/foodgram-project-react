@@ -6,11 +6,12 @@ from rest_framework.generics import (
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwnerOrReadOnly
 from .serializers import UserSerializer, FollowSerializer
-from .models import CustomUser, Follow
+from .models import CustomUser as User
+from .models import Follow
 
 
 class UserProfileListView(ListCreateAPIView):
-    queryset = CustomUser.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
@@ -20,7 +21,7 @@ class UserProfileListView(ListCreateAPIView):
 
 
 class UserProfileDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = CustomUser.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
 

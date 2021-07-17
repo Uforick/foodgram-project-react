@@ -1,19 +1,20 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from .models import CustomUser, Follow
+from .models import CustomUser as User
+from .models import Follow
 
 
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = ['username', 'email', 'password', 'first_name', 'last_name']
 
 
 class FollowSerializer(serializers.ModelSerializer):
     following = serializers.SlugRelatedField(
         slug_field='username',
-        queryset=CustomUser.objects.all()
+        queryset=User.objects.all()
     )
     user = serializers.SlugRelatedField(
         read_only=True,
