@@ -108,3 +108,5 @@ DJOSER = {
         'user_list': ['rest_framework.permissions.AllowAny'],
     },
 }
+
+PER_PAGE = 6
