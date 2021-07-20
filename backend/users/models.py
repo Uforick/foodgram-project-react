@@ -15,3 +15,24 @@ class CustomUser(AbstractUser):
         'first_name',
         'last_name'
     ]
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='user',
+        help_text='Кто подписывается'
+    )
+    following = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='following',
+        help_text='На кого подписываются'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'following'], name='unique_object')
+        ]
