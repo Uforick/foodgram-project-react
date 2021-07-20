@@ -7,14 +7,14 @@ User = get_user_model()
 
 
 class TagModel(models.Model):
-    tags_text = models.CharField(
+    name = models.CharField(
         max_length=15,
         blank=False,
         null=False,
         unique=True,
         verbose_name='Текст тега'
     )
-    color_HEX = models.CharField(
+    color = models.CharField(
         max_length=7,
         blank=False,
         null=False,
@@ -29,7 +29,7 @@ class TagModel(models.Model):
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
-        ordering = ('tags_text',)
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -47,7 +47,7 @@ class IngredientModel(models.Model):
     #     null=True,
     #     blank=True
     # )
-    measure = models.CharField(
+    measurement_unit = models.CharField(
         max_length=10,
         verbose_name='Мера измерения'
     )
@@ -69,35 +69,32 @@ class RecipeModel(models.Model):
     )
     author = models.ForeignKey(
         User,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name='Автор',
     )
-    picture = models.ImageField(
+    image = models.ImageField(
         upload_to='recipes/',
         blank=False,
         null=False,
         verbose_name='Картинка',
     )
-    recipes_text = models.TextField(
+    text = models.TextField(
         blank=False,
         verbose_name='Рецепт',
     )
-    recipes_ingredients = models.ManyToManyField(
+    ingredients = models.ManyToManyField(
         IngredientModel,
-        on_delete=models.SET_NULL,
         related_name='recipes',
         verbose_name='Ингредиенты',
     )
-    recipes_tag = models.ManyToManyField(
+    tags = models.ManyToManyField(
         TagModel,
-        on_delete=SET_NULL,
         related_name='recipes',
         verbose_name='Теги',
     )
     cooking_time = models.PositiveSmallIntegerField(
         default=1,
-        max_length=4,
         verbose_name='Время приготовления',
     )
 

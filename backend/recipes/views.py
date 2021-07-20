@@ -5,10 +5,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import filters, viewsets
 
 from .models import RecipeModel, TagModel, IngredientModel
+from . import serializers
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = RecipeModel.objects.all()
+    serializer_class = serializers.RecipeSerializer
     http_method_names = ('get', 'post', 'put', 'delete')
 
     def perform_create(self, serializer):
@@ -17,9 +19,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = TagModel.objects.all()
+    serializer_class = serializers.TagSerializer
     http_method_names = ('get',)
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = IngredientModel.objects.all()
+    serializer_class = serializers.IngredientSerializer
     http_method_names = ('get',)
