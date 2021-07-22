@@ -10,21 +10,22 @@ from .views import (
 router = DefaultRouter()
 
 router.register(
-    r'recipes/',
+    r'recipes',
     RecipeViewSet,
     basename='recipes',
 )
 router.register(
-    r'tags/',
+    r'tags',
     TagViewSet,
     basename='tags',
 )
 router.register(
-    r'ingredients/',
+    r'ingredients',
     IngredientViewSet,
     basename='ingredients',
 )
 
 urlpatterns = [
     path('', include(router.urls)),
+    # path('', include('users.urls')),
 ]

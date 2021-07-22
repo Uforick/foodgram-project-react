@@ -1,42 +1,57 @@
-from rest_framework import filters, viewsets
-from rest_framework.generics import (
-    ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView
-)
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsOwnerOrReadOnly
-from .serializers import UserSerializer, FollowSerializer
-from .models import CustomUser as User
-from .models import Follow
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import (
+    UserSerializer,
+    FollowSerializer
+)
+from .models import Follow, CustomUser
 
 
-class UserProfileListView(ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        serializer.save(user=user)
-
-
-class UserProfileDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated])
+def whofollows(request):
+    users = request.user.user.all()
+    user_obj = [follow_obj.following for follow_obj in users]
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+    result_page = paginator.paginate_queryset(user_obj, request)
+    serializer = FollowSerializer(
+        result_page, many=True, context={'current_user': request.user})
+    return paginator.get_paginated_response(serializer.data)
 
 
-class FollowViewSet(viewsets.ModelViewSet):
-    queryset = Follow.objects.all()
-    serializer_class = FollowSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['user__username', 'following__username']
-    http_method_names = ('get', 'post')
+class FollowViewSet(APIView):
+    permission_classes = (IsAuthenticated, )
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def get(self, request, user_id):
+        user = request.user
+        following = get_object_or_404(CustomUser, id=user_id)
+        if Follow.objects.filter(user=user, following=following).exists():
+            return Response(
+                'Вы уже подписаны',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        Follow.objects.create(user=user, following=following)
+        serializer = UserSerializer(following)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def get_queryset(self):
-        user = self.request.user
-        queryset = user.following.all()
-        return queryset
+    def delete(self, request, user_id):
+        user = request.user
+        following = get_object_or_404(CustomUser, id=user_id)
+        try:
+            follow = get_object_or_404(user=user, following=following)
+            follow.delete()
+            return Response(
+                'Удалено',
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Exception:
+            return Response(
+                'Подписки не было',
+                status=status.HTTP_400_BAD_REQUEST
+            )

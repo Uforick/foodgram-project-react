@@ -1,21 +1,18 @@
-from django.urls import path
-from django.urls.conf import include
-from rest_framework.routers import DefaultRouter
-from .views import UserProfileDetailView, UserProfileListView, FollowViewSet
-
-router = DefaultRouter()
-
-
-router.register(
-    r'follow',
-    FollowViewSet,
-    basename='follow'
-)
-
+from django.urls import include, path
+from .views import whofollows, FollowViewSet
 
 urlpatterns = [
-    path('', UserProfileListView.as_view(), name='all-profiles'),
-    path('<int:pk>/', UserProfileDetailView.as_view(), name='profile'),
-    path('', include(router.urls))
+    path(
+        'users/subscriptions/',
+        whofollows,
+        name='users_subs'
+    ),
+    path(
+        'users/<int:user_id>/subscribe/',
+        FollowViewSet.as_view(),
+        name='subscribe'
+    ),
+    path('', include('djoser.urls')),
+    path('auth/', include('djoser.urls.authtoken')),
 
 ]

@@ -16,6 +16,9 @@ class CustomUser(AbstractUser):
         'last_name'
     ]
 
+    def __str__(self):
+        return self.username
+
 
 class Follow(models.Model):
     user = models.ForeignKey(
@@ -32,6 +35,8 @@ class Follow(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'following'], name='unique_object')

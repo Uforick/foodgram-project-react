@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models.deletion import SET_NULL
 
 
 User = get_user_model()
@@ -70,13 +69,14 @@ class RecipeModel(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        default=1,
         related_name='recipes',
         verbose_name='Автор',
     )
     image = models.ImageField(
-        upload_to='recipes/',
-        blank=False,
-        null=False,
+        upload_to='static/recipes/',
+        blank=True,
+        null=True,
         verbose_name='Картинка',
     )
     text = models.TextField(
