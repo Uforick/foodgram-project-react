@@ -42,4 +42,3 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteRecipeModel
         fields = '__all__'
-

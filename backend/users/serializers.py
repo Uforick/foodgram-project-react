@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer
 from .models import CustomUser as User
-from .models import Follow
+from .models import FollowModel
 from recipes.models import RecipeModel
 
 
@@ -79,6 +79,9 @@ class FollowSerializer(serializers.ModelSerializer):
             return False
         if other_user.count() == 0:
             return False
-        if Follow.objects.filter(user=user, following=current_user).exists():
+        if FollowModel.objects.filter(
+            user=user,
+            following=current_user
+        ).exists():
             return True
         return False

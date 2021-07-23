@@ -20,7 +20,7 @@ class CustomUser(AbstractUser):
         return self.username
 
 
-class Follow(models.Model):
+class FollowModel(models.Model):
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,

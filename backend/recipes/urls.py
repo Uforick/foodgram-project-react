@@ -4,7 +4,10 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     RecipeViewSet,
     TagViewSet,
-    IngredientViewSet
+    IngredientViewSet,
+    FavouriteViewSet,
+    ShoppingListViewSet,
+    ShopListViev,
 )
 
 router = DefaultRouter()
@@ -26,6 +29,20 @@ router.register(
 )
 
 urlpatterns = [
+    path(
+        'recipes/<int:recipe_id>/favorite/',
+        FavouriteViewSet.as_view(),
+        name='add_recipe_favorite'
+    ),
+    path(
+        'recipes/<int:recipe_id>/shopping_cart/',
+        ShoppingListViewSet.as_view(),
+        name='add_recipe_shop'
+    ),
+    path(
+        'recipes/download_shopping_cart/',
+        ShopListViev.as_view(),
+        name='shop_list'
+    ),
     path('', include(router.urls)),
-    # path('', include('users.urls')),
 ]

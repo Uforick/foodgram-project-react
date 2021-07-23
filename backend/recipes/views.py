@@ -1,12 +1,19 @@
-# from django.contrib.auth.decorators import login_required
-# from django.core.paginator import Paginator
-# from django.conf import settings
-# from django.shortcuts import get_object_or_404, redirect, render
+from rest_framework.views import APIView
+from django.http import HttpResponse
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import permission_classes
 from rest_framework import filters, status, viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from .models import RecipeModel, TagModel, IngredientModel
+from .models import (
+    RecipeModel,
+    TagModel,
+    IngredientModel,
+    FavoriteRecipeModel,
+    ShoppingListModel,
+    AddIngredientInRecModel,
+)
 from . import serializers
 
 
@@ -33,3 +40,103 @@ class IngredientViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', ]
     http_method_names = ('get',)
+
+
+class FavouriteViewSet(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, recipe_id):
+        user = request.user
+        recipe = get_object_or_404(RecipeModel, id=recipe_id)
+        if FavoriteRecipeModel.objects.filter(
+            user=user,
+            recipe=recipe
+        ).exists():
+            return Response(
+                'Вы уже добавили рецепт в избранное',
+                status=status.HTTP_400_BAD_REQUEST)
+        FavoriteRecipeModel.objects.create(user=user, recipe=recipe)
+        serializer = serializers.FavoriteRecipeSerializer(recipe)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED)
+
+    def delete(self, request, recipe_id):
+        user = request.user
+        recipe = get_object_or_404(RecipeModel, id=recipe_id)
+        favorite_obj = get_object_or_404(
+            FavoriteRecipeModel,
+            user=user,
+            recipe=recipe
+        )
+        if not favorite_obj:
+            return Response(
+                'Рецепт не был в избранном',
+                status=status.HTTP_400_BAD_REQUEST)
+        favorite_obj.delete()
+        return Response(
+            'Удалено', status=status.HTTP_204_NO_CONTENT)
+
+
+class ShoppingListViewSet(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, recipe_id):
+        user = request.user
+        recipe = get_object_or_404(RecipeModel, id=recipe_id)
+        if ShoppingListModel.objects.filter(user=user, recipe=recipe).exists():
+            return Response(
+                'Вы уже добавили рецепт в список покупок',
+                status=status.HTTP_400_BAD_REQUEST)
+        ShoppingListModel.objects.create(user=user, recipe=recipe)
+        serializer = serializers.FavoriteRecipeSerializer(recipe)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED)
+
+    def delete(self, request, recipe_id):
+        user = request.user
+        recipe = get_object_or_404(RecipeModel, id=recipe_id)
+        shopping_list_obj = get_object_or_404(
+            ShoppingListModel, user=user, recipe=recipe)
+        if not shopping_list_obj:
+            return Response(
+                'Рецепт не был в списке покупок',
+                status=status.HTTP_400_BAD_REQUEST)
+        shopping_list_obj.delete()
+        return Response(
+            'Удалено', status=status.HTTP_204_NO_CONTENT)
+
+
+class ShopListViev(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        user = request.user
+        shopping_cart = user.purchases.all()
+        buying_list = {}
+        for record in shopping_cart:
+            recipe = record.recipe
+            ingredients = AddIngredientInRecModel.objects.filter(recipe=recipe)
+            for ingredient in ingredients:
+                amount = ingredient.amount
+                name = ingredient.ingredient.name
+                measurement_unit = ingredient.ingredient.measurement_unit
+                if name not in buying_list:
+                    buying_list[name] = {
+                        'measurement_unit': measurement_unit,
+                        'amount': amount
+                    }
+                else:
+                    buying_list[name]['amount'] = (buying_list[name]['amount']
+                                                   + amount)
+
+        wishlist = []
+        for item in buying_list:
+            wishlist.append(f'{item} - {buying_list[item]["amount"]} '
+                            f'{buying_list[item]["measurement_unit"]} \n')
+        wishlist.append('\n')
+        wishlist.append('FoodGram, 2021')
+        response = HttpResponse(wishlist, 'Content-Type: text/plain')
+        response['Content-Disposition'] = 'attachment; filename="wishlist.txt"'
+        return response
