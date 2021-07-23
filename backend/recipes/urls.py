@@ -7,7 +7,7 @@ from .views import (
     IngredientViewSet,
     FavouriteViewSet,
     ShoppingListViewSet,
-    ShopListViev,
+    CalcPrintShopListView,
 )
 
 router = DefaultRouter()
@@ -41,7 +41,7 @@ urlpatterns = [
     ),
     path(
         'recipes/download_shopping_cart/',
-        ShopListViev.as_view(),
+        CalcPrintShopListView.as_view(),
         name='shop_list'
     ),
     path('', include(router.urls)),

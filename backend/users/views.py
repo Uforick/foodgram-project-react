@@ -9,7 +9,7 @@ from .serializers import (
     UserSerializer,
     FollowSerializer
 )
-from .models import Follow, CustomUser
+from .models import FollowModel, CustomUser
 
 
 @api_view(['GET', ])
@@ -31,12 +31,12 @@ class FollowViewSet(APIView):
     def get(self, request, user_id):
         user = request.user
         following = get_object_or_404(CustomUser, id=user_id)
-        if Follow.objects.filter(user=user, following=following).exists():
+        if FollowModel.objects.filter(user=user, following=following).exists():
             return Response(
                 'Вы уже подписаны',
                 status=status.HTTP_400_BAD_REQUEST
             )
-        Follow.objects.create(user=user, following=following)
+        FollowModel.objects.create(user=user, following=following)
         serializer = UserSerializer(following)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

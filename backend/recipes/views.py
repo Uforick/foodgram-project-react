@@ -54,12 +54,14 @@ class FavouriteViewSet(APIView):
         ).exists():
             return Response(
                 'Вы уже добавили рецепт в избранное',
-                status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         FavoriteRecipeModel.objects.create(user=user, recipe=recipe)
         serializer = serializers.FavoriteRecipeSerializer(recipe)
         return Response(
             serializer.data,
-            status=status.HTTP_201_CREATED)
+            status=status.HTTP_201_CREATED,
+        )
 
     def delete(self, request, recipe_id):
         user = request.user
@@ -67,15 +69,18 @@ class FavouriteViewSet(APIView):
         favorite_obj = get_object_or_404(
             FavoriteRecipeModel,
             user=user,
-            recipe=recipe
+            recipe=recipe,
         )
         if not favorite_obj:
             return Response(
                 'Рецепт не был в избранном',
-                status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         favorite_obj.delete()
         return Response(
-            'Удалено', status=status.HTTP_204_NO_CONTENT)
+            'Удалено',
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
 
 class ShoppingListViewSet(APIView):
@@ -87,12 +92,14 @@ class ShoppingListViewSet(APIView):
         if ShoppingListModel.objects.filter(user=user, recipe=recipe).exists():
             return Response(
                 'Вы уже добавили рецепт в список покупок',
-                status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         ShoppingListModel.objects.create(user=user, recipe=recipe)
         serializer = serializers.FavoriteRecipeSerializer(recipe)
         return Response(
             serializer.data,
-            status=status.HTTP_201_CREATED)
+            status=status.HTTP_201_CREATED,
+        )
 
     def delete(self, request, recipe_id):
         user = request.user
@@ -102,41 +109,44 @@ class ShoppingListViewSet(APIView):
         if not shopping_list_obj:
             return Response(
                 'Рецепт не был в списке покупок',
-                status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         shopping_list_obj.delete()
         return Response(
-            'Удалено', status=status.HTTP_204_NO_CONTENT)
+            'Удалено',
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
 
-class ShopListViev(APIView):
+class CalcPrintShopListView(APIView):
     permission_classes = (IsAuthenticated, )
 
     def get(self, request):
         user = request.user
-        shopping_cart = user.purchases.all()
+        shopping_cart = user.shopper.all()
         buying_list = {}
         for record in shopping_cart:
             recipe = record.recipe
             ingredients = AddIngredientInRecModel.objects.filter(recipe=recipe)
             for ingredient in ingredients:
-                amount = ingredient.amount
+                add_quantity = ingredient.add_quantity
                 name = ingredient.ingredient.name
                 measurement_unit = ingredient.ingredient.measurement_unit
                 if name not in buying_list:
                     buying_list[name] = {
                         'measurement_unit': measurement_unit,
-                        'amount': amount
+                        'add_quantity': add_quantity
                     }
                 else:
-                    buying_list[name]['amount'] = (buying_list[name]['amount']
-                                                   + amount)
+                    buying_list[name]['add_quantity'] = (
+                        buying_list[name]['add_quantity'] + add_quantity
+                    )
 
-        wishlist = []
+        ingredient_list = []
         for item in buying_list:
-            wishlist.append(f'{item} - {buying_list[item]["amount"]} '
-                            f'{buying_list[item]["measurement_unit"]} \n')
-        wishlist.append('\n')
-        wishlist.append('FoodGram, 2021')
-        response = HttpResponse(wishlist, 'Content-Type: text/plain')
-        response['Content-Disposition'] = 'attachment; filename="wishlist.txt"'
+            ingredient_list.append(f'{item} - {buying_list[item]["add_quantity"]} '
+                                   f'{buying_list[item]["measurement_unit"]} \n')
+        # ingredient_list.append('\n')
+        response = HttpResponse(ingredient_list, 'Content-Type: text/plain')
+        response['Content-Disposition'] = 'attachment; filename="ingredient_list.txt"'
         return response
