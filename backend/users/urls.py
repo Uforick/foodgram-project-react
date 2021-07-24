@@ -1,5 +1,6 @@
 from django.urls import include, path
-from .views import whofollows, FollowViewSet
+
+from .views import FollowViewSet, whofollows
 
 urlpatterns = [
     path(

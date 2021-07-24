@@ -1,15 +1,13 @@
-from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .serializers import (
-    UserSerializer,
-    FollowSerializer
-)
-from .models import FollowModel, CustomUser
+from rest_framework.views import APIView
+
+from .models import CustomUser, FollowModel
+from .serializers import FollowSerializer, UserSerializer
 
 
 @api_view(['GET', ])

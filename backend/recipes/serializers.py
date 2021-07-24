@@ -1,17 +1,12 @@
+from rest_framework import serializers
 from rest_framework.fields import ImageField
+
 from users.models import FollowModel
 from users.serializers import UserSerializerModified
-from rest_framework import serializers
 
-from .models import (
-    RecipeModel,
-    ShoppingListModel,
-    TagModel,
-    IngredientModel,
-    AddIngredientInRecModel,
-    FavoriteRecipeModel,
-    User
-)
+from .models import (AddIngredientInRecModel, FavoriteRecipeModel,
+                     IngredientModel, RecipeModel, ShoppingListModel, TagModel,
+                     User)
 
 
 class TagSerializer(serializers.ModelSerializer):
