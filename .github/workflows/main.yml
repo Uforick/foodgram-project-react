@@ -41,7 +41,7 @@ jobs:
         with:
           push: true
           context: ./backend/
-          tags: ${{ secrets.DOCKER_USERNAME }}/warmspace-foodgram:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/warmspace-foodgram
 
   deploy:
     runs-on: ubuntu-latest
@@ -57,8 +57,8 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           stack_file_name: docker-compose.yaml
           script: |
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace-foodgram:latest
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace-foodgram-frontend:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace-foodgram
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace-foodgram-frontend
             sudo docker-compose stop
             sudo docker-compose rm web
             touch .env 
