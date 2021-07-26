@@ -56,7 +56,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-          stack_file_name: infra/docker-compose.yml
+          stack_file_name: docker-compose.yml
           script: |
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram:latest
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram_frontend:1
