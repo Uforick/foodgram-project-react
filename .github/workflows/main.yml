@@ -43,12 +43,7 @@ jobs:
           push: true
           context: ./backend/
           tags: ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram:latest
-      - name: Push to Docker Hub(frontend)
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          context: ./frontend/
-          tags: ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram_frontend:latest
+
 
   deploy:
     runs-on: ubuntu-latest
@@ -61,10 +56,10 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-          stack_file_name: docker-compose.yaml
+          stack_file_name: docker-compose.yml
           script: |
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram:latest
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram_frontend:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram_frontend:1
             sudo docker-compose stop
             sudo docker-compose rm web
             touch .env 
