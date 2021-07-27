@@ -1,16 +1,21 @@
 from django.contrib import admin
 
-from .models import (FavoriteRecipeModel, IngredientModel, RecipeModel,
-                     ShoppingListModel, TagModel)
+from .models import (
+    FavoriteRecipeModel,
+    IngredientModel,
+    RecipeModel,
+    ShoppingListModel,
+    TagModel,
+)
 
 
 class RecipeAdmin(admin.ModelAdmin):
     list_filter = ('author', 'name', 'tags')
-    list_display = ('name', 'followers')
+    list_display = ('name', 'followers',)
 
     @admin.display(empty_value=None)
     def followers(self, obj):
-        return obj.favorite_recipe.all().count()
+        return obj.recipe_in_favorite.all().count()
 
 
 class IngredientAdmin(admin.ModelAdmin):
