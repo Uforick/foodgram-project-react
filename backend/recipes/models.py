@@ -1,4 +1,5 @@
 from django.db import models
+from slugify import slugify
 
 from users.models import CustomUser as User
 
@@ -17,6 +18,7 @@ class TagModel(models.Model):
         verbose_name='Цвет тега',
     )
     slug = models.SlugField(
+        default=slugify(name),
         max_length=30,
         unique=True,
         verbose_name='Имя адреса тега',
