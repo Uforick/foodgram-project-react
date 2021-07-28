@@ -1,146 +1,167 @@
+from django.utils import timezone
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, status, viewsets
-from rest_framework.decorators import permission_classes
+from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
-
+from rest_framework.decorators import action
+from rest_framework.viewsets import (
+    GenericViewSet,
+    ReadOnlyModelViewSet,
+    mixins
+)
+from pagination import CustomPageSizePagination
+from permissions import IsOwnerOrRead, AuthPostRetrieve
+from .filters import IngredientNameFilter, RecipeFilter
 from . import serializers
-from .models import (AddIngredientInRecModel, FavoriteRecipeModel,
-                     IngredientModel, RecipeModel, ShoppingListModel, TagModel)
+from .models import (
+    AddIngredientInRecModel,
+    FavoriteRecipeModel,
+    IngredientModel,
+    RecipeModel,
+    ShoppingListModel,
+    TagModel
+)
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = RecipeModel.objects.all()
-    serializer_class = serializers.RecipeSerializer
-    http_method_names = ('get', 'post', 'put', 'delete')
+class TagViewSet(ReadOnlyModelViewSet):
+    queryset = TagModel.objects.all()
+    serializer_class = serializers.TagSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
 
-    @permission_classes([IsAuthenticated])
+
+class IngredientViewSet(ReadOnlyModelViewSet):
+    queryset = IngredientModel.objects.all()
+    permission_classes = AllowAny
+    serializer_class = serializers.IngredientReadSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+    filterset_class = IngredientNameFilter
+
+
+class RecipeViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
+    GenericViewSet
+):
+    queryset = RecipeModel.objects.all().order_by('-id')
+    permission_classes = [AuthPostRetrieve, IsOwnerOrRead]
+    pagination_class = CustomPageSizePagination
+    filterset_class = RecipeFilter
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return serializers.RecipeReadSerializer
+        return serializers.RecipeWriteSerializer
+
     def perform_create(self, serializer):
         return serializer.save(author=self.request.user)
 
-
-class TagViewSet(viewsets.ModelViewSet):
-    queryset = TagModel.objects.all()
-    serializer_class = serializers.TagSerializer
-    http_method_names = ('get',)
-
-
-class IngredientViewSet(viewsets.ModelViewSet):
-    queryset = IngredientModel.objects.all()
-    permission_classes = AllowAny
-    serializer_class = serializers.IngredientSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name', ]
-    http_method_names = ('get',)
-
-
-class FavouriteViewSet(APIView):
-    permission_classes = (IsAuthenticated, )
-
-    def get(self, request, recipe_id):
+    @action(
+        detail=True,
+        methods=['get', 'delete'],
+        permission_classes=[IsAuthenticated]
+    )
+    def favorite(self, request, pk):
+        recipe = get_object_or_404(RecipeModel, pk=pk)
         user = request.user
-        recipe = get_object_or_404(RecipeModel, id=recipe_id)
-        if FavoriteRecipeModel.objects.filter(
-            user=user,
-            recipe=recipe
-        ).exists():
-            return Response(
-                'Вы уже добавили рецепт в избранное',
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        FavoriteRecipeModel.objects.create(user=user, recipe=recipe)
-        serializer = serializers.FavoriteRecipeSerializer(recipe)
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED,
-        )
+        if request.method == 'GET':
+            if not user.is_favorited.filter(recipe=recipe).exists():
+                FavoriteRecipeModel.objects.create(user=user, recipe=recipe)
+                serializer = serializers.FavouriteSerializer(
+                    recipe, context={'request': request})
+                return Response(data=serializer.data,
+                                status=status.HTTP_201_CREATED)
+            data = {
+                'errors': 'Этот рецепт уже есть в избранном'
+            }
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        if not user.is_favorited.filter(recipe=recipe).exists():
+            data = {
+                'errors': 'Этого рецепта не было в вашем избранном'
+            }
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        FavoriteRecipeModel.objects.filter(user=user, recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def delete(self, request, recipe_id):
+    @action(detail=True,
+            methods=['get', 'delete'],
+            permission_classes=[IsAuthenticated])
+    def shopping_cart(self, request, pk):
+        recipe = get_object_or_404(RecipeModel, pk=pk)
         user = request.user
-        recipe = get_object_or_404(RecipeModel, id=recipe_id)
-        favorite_obj = get_object_or_404(
-            FavoriteRecipeModel,
-            user=user,
-            recipe=recipe,
-        )
-        if not favorite_obj:
-            return Response(
-                'Рецепт не был в избранном',
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        favorite_obj.delete()
-        return Response(
-            'Удалено',
-            status=status.HTTP_204_NO_CONTENT,
-        )
+        if request.method == 'GET':
+            if not user.is_in_shopping_cart.filter(recipe=recipe).exists():
+                ShoppingListModel.objects.create(user=user, recipe=recipe)
+                serializer = serializers.FavouriteSerializer(
+                    recipe, context={'request': request})
+                return Response(data=serializer.data,
+                                status=status.HTTP_201_CREATED)
+            data = {
+                'errors': 'Этот рецепт уже есть в списке покупок'
+            }
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        if not user.is_in_shopping_cart.filter(recipe=recipe).exists():
+            data = {
+                'errors': 'Этого рецепта не было в вашем списке покупок'
+            }
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        ShoppingListModel.objects.filter(user=user, recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class ShoppingListViewSet(APIView):
-    permission_classes = (IsAuthenticated, )
-
-    def get(self, request, recipe_id):
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated]
+    )
+    def download_shopping_cart(self, request):
         user = request.user
-        recipe = get_object_or_404(RecipeModel, id=recipe_id)
-        if ShoppingListModel.objects.filter(user=user, recipe=recipe).exists():
-            return Response(
-                'Вы уже добавили рецепт в список покупок',
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        ShoppingListModel.objects.create(user=user, recipe=recipe)
-        serializer = serializers.FavoriteRecipeSerializer(recipe)
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED,
-        )
-
-    def delete(self, request, recipe_id):
-        user = request.user
-        recipe = get_object_or_404(RecipeModel, id=recipe_id)
-        shopping_list_obj = get_object_or_404(
-            ShoppingListModel, user=user, recipe=recipe)
-        if not shopping_list_obj:
-            return Response(
-                'Рецепт не был в списке покупок',
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        shopping_list_obj.delete()
-        return Response(
-            'Удалено',
-            status=status.HTTP_204_NO_CONTENT,
-        )
-
-
-class CalcPrintShopListView(APIView):
-    permission_classes = (IsAuthenticated, )
-
-    def get(self, request):
-        user = request.user
-        shopping_cart = user.shopper.all()
-        buying_list = {}
-        for record in shopping_cart:
-            recipe = record.recipe
+        shopping_cart = user.is_in_shopping_cart.all()
+        shopping_list = {}
+        for item in shopping_cart:
+            recipe = item.recipe
             ingredients = AddIngredientInRecModel.objects.filter(recipe=recipe)
             for ingredient in ingredients:
-                add_quantity = ingredient.add_quantity
                 name = ingredient.ingredient.name
                 measurement_unit = ingredient.ingredient.measurement_unit
-                if name not in buying_list:
-                    buying_list[name] = {
+                amount = ingredient.amount
+                if name not in shopping_list:
+                    shopping_list[name] = {
                         'measurement_unit': measurement_unit,
-                        'add_quantity': add_quantity
+                        'amount': amount
                     }
                 else:
-                    buying_list[name]['add_quantity'] = (
-                        buying_list[name]['add_quantity'] + add_quantity
-                    )
-
-        ingredient_list = []
-        for item in buying_list:
-            ingredient_list.append(f'{item} - {buying_list[item]["add_quantity"]} '
-                                   f'{buying_list[item]["measurement_unit"]} \n')
-        # ingredient_list.append('\n')
-        response = HttpResponse(ingredient_list, 'Content-Type: text/plain')
-        response['Content-Disposition'] = 'attachment; filename="ingredient_list.txt"'
+                    shopping_list[name]['amount'] += amount
+        file_name = 'СПИСОК ПОКУПОК'
+        doc_title = 'СПИСОК ПОКУПОК ДЛЯ РЕЦЕПТОВ'
+        title = 'СПИСОК ПОКУПОК'
+        sub_title = f'{timezone.now().date()}'
+        response = HttpResponse(content_type='application/pdf')
+        content_disposition = f'attachment; filename="{file_name}.pdf"'
+        response['Content-Disposition'] = content_disposition
+        pdf = canvas.Canvas(response)
+        pdf.setTitle(doc_title)
+        pdfmetrics.registerFont(TTFont('Dej', 'DejaVuSans.ttf'))
+        pdf.setFont('Dej', 24)
+        pdf.drawCentredString(300, 770, title)
+        pdf.setFont('Dej', 16)
+        pdf.drawCentredString(290, 720, sub_title)
+        pdf.line(30, 710, 565, 710)
+        height = 670
+        for name, data in shopping_list.items():
+            pdf.drawString(
+                50,
+                height,
+                f"{name} - {data['amount']} {data['measurement_unit']}"
+            )
+            height -= 25
+        pdf.showPage()
+        pdf.save()
         return response

@@ -7,17 +7,13 @@ from rest_framework import serializers
 from django.core.files.base import ContentFile
 from rest_framework.generics import get_object_or_404
 
-from users.models import FollowModel
 from users.serializers import UserSerializer
 
 from .models import (
     AddIngredientInRecModel,
-    FavoriteRecipeModel,
     IngredientModel,
     RecipeModel,
-    ShoppingListModel,
     TagModel,
-    User,
 )
 
 

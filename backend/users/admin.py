@@ -1,12 +1,17 @@
 from django.contrib import admin
 
-from .models import CustomUser as User
-from .models import FollowModel
+from .models import FollowModel, CustomUser
 
 
 class UserAdmin(admin.ModelAdmin):
     list_filter = ('username', 'email')
 
 
-admin.site.register(User, UserAdmin)
-admin.site.register(FollowModel)
+@admin.register(FollowModel)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'author')
+    search_fields = ('user', 'author')
+    list_filter = ('user', 'author')
+
+
+admin.site.register(CustomUser, UserAdmin)
