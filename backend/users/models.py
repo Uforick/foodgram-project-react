@@ -24,13 +24,13 @@ class FollowModel(models.Model):
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='user',
+        related_name='subscribed_on',
         help_text='Кто подписывается'
     )
-    following = models.ForeignKey(
+    author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='following',
+        related_name='subscriber',
         help_text='На кого подписываются'
     )
 
@@ -39,5 +39,5 @@ class FollowModel(models.Model):
         verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'following'], name='unique_object')
+                fields=['user', 'following'], name='subscribe')
         ]

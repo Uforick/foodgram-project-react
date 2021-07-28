@@ -1,57 +1,32 @@
-from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
 from recipes.models import RecipeModel
 
-from .models import CustomUser as User
-from .models import FollowModel
+from .models import CustomUser
 
 
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             'id',
             'username',
             'email',
-            'first_name',
-            'last_name'
-        )
-
-
-class UserSerializerModified(UserCreateSerializer):
-    is_subscribed = serializers.SerializerMethodField()
-
-    class Meta(UserCreateSerializer.Meta):
-        fields = (
-            'email',
-            'id',
-            'username',
             'first_name',
             'last_name',
             'is_subscribed',
+            'password',
         )
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
     def get_is_subscribed(self, obj):
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
+        user = self.context['request'].user
+        if not user.is_authenticated:
             return False
-        return FollowModel.objects.filter(user=request.user, author=obj).exists()
-
-
-class CustomUserCreateSerializer(UserCreateSerializer):
-
-    class Meta:
-        model = User
-        fields = (
-            'id',
-            'username',
-            'email',
-            'password',
-            'first_name',
-            'last_name'
-        )
+        return obj.subscriber.filter(user=user).exists()
 
 
 class FollowRecipeSerializer(serializers.ModelSerializer):
@@ -72,13 +47,20 @@ class FollowRecipeSerializer(serializers.ModelSerializer):
         )
 
 
+class SubRecipeSerializer(serializers.ModelSerializer):
+
+    class Meta():
+        model = RecipeModel
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
 class FollowSerializer(serializers.ModelSerializer):
-    recipes = FollowRecipeSerializer(many=True, read_only=True)
-    recipes_count = serializers.SerializerMethodField('count_author_recipes')
-    is_subscribed = serializers.SerializerMethodField('if_subscribed')
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             'email',
             'id',
@@ -90,19 +72,20 @@ class FollowSerializer(serializers.ModelSerializer):
             'recipes_count'
         )
 
-    def count_author_recipes(self, user):
-        return len(user.recipes.all())
+    def get_is_subscribed(self, obj):
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            return False
+        return obj.subscriber.filter(user=user).exists()
 
-    def if_subscribed(self, user):
-        current_user = self.context.get('current_user')
-        other_user = user.following.all()
-        if user.is_anonymous:
-            return False
-        if other_user.count() == 0:
-            return False
-        if FollowModel.objects.filter(
-            user=user,
-            following=current_user
-        ).exists():
-            return True
-        return False
+    def get_recipes(self, obj):
+        request = self.context['request']
+        limit = int(request.query_params.get('recipes_limit', 3))
+        recipes = obj.recipes.all()[:limit]
+        serializer = SubRecipeSerializer(
+            recipes, many=True, context={'request': request}
+        )
+        return serializer.data
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.all().count()
