@@ -1,12 +1,8 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import (
-    IngredientModel,
-    RecipeModel,
-    AddIngredientInRecModel,
-    TagModel,
-)
+from .models import (AddIngredientInRecModel, IngredientModel, RecipeModel,
+                     TagModel)
 
 
 @admin.register(TagModel)

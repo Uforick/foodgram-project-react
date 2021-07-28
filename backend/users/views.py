@@ -2,12 +2,12 @@ from django.shortcuts import get_object_or_404
 from djoser.serializers import SetPasswordSerializer
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import CustomUser, FollowModel
-from .serializers import FollowSerializer, UserSerializer
 from .permissions import IsOwnerOrAdmin
+from .serializers import FollowSerializer, UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):

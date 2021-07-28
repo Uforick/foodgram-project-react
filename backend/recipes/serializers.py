@@ -3,18 +3,14 @@ import imghdr
 import uuid
 
 import six
-from rest_framework import serializers
 from django.core.files.base import ContentFile
+from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
 from users.serializers import UserSerializer
 
-from .models import (
-    AddIngredientInRecModel,
-    IngredientModel,
-    RecipeModel,
-    TagModel,
-)
+from .models import (AddIngredientInRecModel, IngredientModel, RecipeModel,
+                     TagModel)
 
 
 class Base64ImageField(serializers.ImageField):

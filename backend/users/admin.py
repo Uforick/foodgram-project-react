@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import FollowModel, CustomUser
+from .models import CustomUser, FollowModel
 
 
 class UserAdmin(admin.ModelAdmin):

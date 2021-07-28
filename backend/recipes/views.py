@@ -1,30 +1,22 @@
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from pagination import CustomPageSizePagination
+from permissions import AuthPostRetrieve, IsOwnerOrRead
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework.viewsets import (
-    GenericViewSet,
-    ReadOnlyModelViewSet,
-    mixins
-)
-from pagination import CustomPageSizePagination
-from permissions import IsOwnerOrRead, AuthPostRetrieve
-from .filters import IngredientNameFilter, RecipeFilter
+from rest_framework.viewsets import (GenericViewSet, ReadOnlyModelViewSet,
+                                     mixins)
+
 from . import serializers
-from .models import (
-    AddIngredientInRecModel,
-    FavoriteRecipeModel,
-    IngredientModel,
-    RecipeModel,
-    ShoppingListModel,
-    TagModel
-)
+from .filters import IngredientNameFilter, RecipeFilter
+from .models import (AddIngredientInRecModel, FavoriteRecipeModel,
+                     IngredientModel, RecipeModel, ShoppingListModel, TagModel)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
