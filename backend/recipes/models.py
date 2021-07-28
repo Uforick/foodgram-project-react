@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth import get_user_model
+from django.core import validators
 
 from users.models import CustomUser as User
 
@@ -9,17 +11,17 @@ class TagModel(models.Model):
         blank=False,
         null=False,
         unique=True,
-        verbose_name='Текст тега',
+        verbose_name='Тег',
     )
     color = models.CharField(
         max_length=7,
-        default='ff0000',
-        verbose_name='Цвет тега',
+        default='#ff0000',
+        verbose_name='Цвет',
     )
     slug = models.SlugField(
         max_length=30,
         unique=True,
-        verbose_name='Имя адреса тега',
+        verbose_name='Адрес',
     )
 
     class Meta:
@@ -65,8 +67,7 @@ class RecipeModel(models.Model):
     )
     image = models.ImageField(
         upload_to='static/recipes/',
-        blank=True,
-        null=True,
+        blank=False,
         verbose_name='Картинка',
     )
     text = models.TextField(
@@ -76,6 +77,8 @@ class RecipeModel(models.Model):
     ingredients = models.ManyToManyField(
         IngredientModel,
         related_name='recipes',
+        through='RecipeIngredient',
+        blank=False,
         verbose_name='Ингредиенты',
     )
     tags = models.ManyToManyField(
@@ -87,15 +90,10 @@ class RecipeModel(models.Model):
         default=1,
         verbose_name='Время приготовления',
     )
-    pub_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата публикации'
-    )
 
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-        ordering = ('-pub_date',)
 
     def __str__(self):
         return self.name
@@ -105,17 +103,16 @@ class AddIngredientInRecModel(models.Model):
     ingredient = models.ForeignKey(
         IngredientModel,
         on_delete=models.CASCADE,
+        related_name='amounts',
         verbose_name='Ингридиент для рецепта',
     )
     recipe = models.ForeignKey(
         RecipeModel,
         on_delete=models.CASCADE,
+        related_name='amounts',
         verbose_name='Сам рецепт',
     )
-    add_quantity = models.PositiveSmallIntegerField(
-        default=1,
-        verbose_name='Добавить количество ингредиента',
-    )
+    amount = models.PositiveIntegerField()
 
     class Meta:
         verbose_name = 'Количество или масса ингредиента'
