@@ -59,7 +59,7 @@ jobs:
           stack_file_name: docker-compose.yml
           script: |
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram:latest
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram_frontend:1
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram_frontend:latest
             sudo docker-compose stop
             sudo docker-compose rm backend -f
             touch .env
