@@ -139,15 +139,15 @@ class ShoppingListModel(models.Model):
         verbose_name='Рецепт для покупки',
     )
 
-    # class Meta:
-    #     verbose_name = 'Покупка'
-    #     verbose_name_plural = 'Покупки'
-    #     constraints = [
-    #         models.UniqueConstraint(
-    #             fields=['user', 'recipe'],
-    #             name='cart_user_recept_unique',
-    #         )
-    #     ]
+    class Meta:
+        verbose_name = 'Покупка'
+        verbose_name_plural = 'Покупки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='cart_user_recept_unique',
+            )
+        ]
 
     def __str__(self):
         return f'{self.recipe} {self.user}'
