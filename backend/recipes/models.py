@@ -144,7 +144,8 @@ class ShoppingListModel(models.Model):
         verbose_name_plural = 'Покупки'
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'], name='cart_user_recept_unique'
+                fields=['user', 'recipe'],
+                name='cart_user_recept_unique',
             )
         ]
 
