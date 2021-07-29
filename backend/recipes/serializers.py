@@ -9,12 +9,8 @@ from rest_framework.generics import get_object_or_404
 
 from users.serializers import UserSerializer
 
-from .models import (
-    AddIngredientInRecModel,
-    IngredientModel,
-    RecipeModel,
-    TagModel
-)
+from .models import (AddIngredientInRecModel, IngredientModel, RecipeModel,
+                     TagModel)
 
 
 class Base64ImageField(serializers.ImageField):
