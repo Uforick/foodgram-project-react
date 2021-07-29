@@ -61,7 +61,7 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram:latest
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/warmspace_foodgram_frontend:latest
             sudo docker-compose stop
-            sudo docker-compose rm backend -f
+            sudo docker-compose rm -f backend
             touch .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env

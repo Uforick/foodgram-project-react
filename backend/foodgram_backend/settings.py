@@ -10,7 +10,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY'),
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', 'web', '178.154.222.48']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', 'backend', '178.154.222.48']
 
 CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
 
