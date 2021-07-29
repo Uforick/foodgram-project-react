@@ -7,19 +7,16 @@ class CustomUser(AbstractUser):
         'first name',
         max_length=30,
         blank=False,
-        help_text='Required. 30 characters or fewer.'
     )
     last_name = models.CharField(
         'last name',
         max_length=150,
         blank=False,
-        help_text='Required. 150 characters or fewer.'
     )
     email = models.EmailField(
         'email address',
         blank=False,
         unique=True,
-        help_text='Required.'
     )
 
     class Meta:
