@@ -1,23 +1,31 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models.fields import CharField
 
 
 class CustomUser(AbstractUser):
-    username = CharField(max_length=30, unique=True)
-    email = models.EmailField(('email address'), unique=True)
-    first_name = models.CharField(max_length=30, null=False, blank=False)
-    last_name = models.CharField(max_length=30, null=False, blank=False)
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = [
-        'username',
-        'password',
-        'first_name',
-        'last_name'
-    ]
+    first_name = models.CharField(
+        'first name',
+        max_length=30,
+        blank=False,
+        help_text='Required. 30 characters or fewer.'
+    )
+    last_name = models.CharField(
+        'last name',
+        max_length=150,
+        blank=False,
+        help_text='Required. 150 characters or fewer.'
+    )
+    email = models.EmailField(
+        'email address',
+        blank=False,
+        unique=True,
+        help_text='Required.'
+    )
 
-    def __str__(self):
-        return self.username
+    class Meta:
+        app_label = 'users'
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
 
 class FollowModel(models.Model):
