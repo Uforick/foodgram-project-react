@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+import json
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from reportlab.pdfbase import pdfmetrics
@@ -6,7 +7,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import (GenericViewSet, ReadOnlyModelViewSet,
                                      mixins)
@@ -33,6 +34,15 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     pagination_class = None
     filterset_class = IngredientNameFilter
+
+    @action(detail=True,
+            methods=['get'],
+            permission_classes=[IsAdminUser])
+    def pars_me(self,):
+        with open('backend/pars_data/ingredients.json') as json_file:
+            data = json.load(json_file)
+            for num in data:
+                IngredientModel.objects.create(name=num['title'], measurement_unit=num['dimension'])
 
 
 class RecipeViewSet(
