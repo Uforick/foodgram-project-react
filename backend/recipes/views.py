@@ -27,7 +27,11 @@ class TagViewSet(ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class IngredientViewSet(ReadOnlyModelViewSet):
+class IngredientViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericViewSet
+):
     queryset = IngredientModel.objects.all()
     permission_classes = AllowAny
     serializer_class = serializers.IngredientReadSerializer
