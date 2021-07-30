@@ -38,7 +38,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     @action(detail=True,
             methods=['get'],
             permission_classes=[IsAdminUser])
-    def pars_me(self,):
+    def pars_me(self, request):
         with open('backend/pars_data/ingredients.json') as json_file:
             data = json.load(json_file)
             for num in data:
