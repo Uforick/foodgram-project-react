@@ -67,11 +67,11 @@ class FollowSerializer(serializers.ModelSerializer):
             'email',
             'id',
             'username',
-            'first_name'
+            'first_name',
             'last_name',
             'is_subscribed',
             'recipes',
-            'recipes_count'
+            'recipes_count',
         )
 
     def get_is_subscribed(self, obj):
