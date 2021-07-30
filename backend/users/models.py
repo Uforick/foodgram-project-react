@@ -23,26 +23,3 @@ class CustomUser(AbstractUser):
         app_label = 'users'
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-
-
-class FollowModel(models.Model):
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='subscribed_on',
-        help_text='Кто подписывается'
-    )
-    author = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='subscriber',
-        help_text='На кого подписываются'
-    )
-
-    class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'author'], name='subscribe')
-        ]

@@ -1,25 +1,29 @@
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.serializers import SetPasswordSerializer
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import CustomUser, FollowModel
-from .permissions import IsOwnerOrAdmin
+from .permissions import AllowAnyGetPost, CurrentUserOrAdmin
 from .serializers import FollowSerializer, UserSerializer
+from recipes.models import FollowModel
+
+
+User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all().order_by('id')
+    queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAnyGetPost]
 
     def perform_create(self, serializer):
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
         serializer.save()
-        user = get_object_or_404(CustomUser, username=username)
+        user = get_object_or_404(User, username=username)
         user.set_password(password)
         user.save()
 
@@ -34,7 +38,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False,
             methods=['post'],
-            permission_classes=[IsOwnerOrAdmin])
+            permission_classes=[CurrentUserOrAdmin])
     def set_password(self, request, *args, **kwargs):
         serializer = SetPasswordSerializer(
             data=request.data,
@@ -50,7 +54,7 @@ class UserViewSet(viewsets.ModelViewSet):
             methods=['get'],
             permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
-        queryset = CustomUser.objects.filter(
+        queryset = User.objects.filter(
             subscriber__user=request.user).order_by('id')
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -67,7 +71,7 @@ class UserViewSet(viewsets.ModelViewSet):
             methods=['get', 'delete'],
             permission_classes=[IsAuthenticated])
     def subscribe(self, request, pk):
-        author = get_object_or_404(CustomUser, pk=pk)
+        author = get_object_or_404(User, pk=pk)
         user = request.user
         subscribed = user.subscribed_on.filter(author=author).exists()
         if request.method == 'GET':

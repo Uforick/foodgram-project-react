@@ -1,8 +1,9 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from recipes.models import RecipeModel
 
-from .models import CustomUser
+User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -18,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_subscribed',
             'password'
         )
-        model = CustomUser
+        model = User
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -61,7 +62,7 @@ class FollowSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = (
             'email',
             'id',
@@ -84,7 +85,9 @@ class FollowSerializer(serializers.ModelSerializer):
         limit = int(request.query_params.get('recipes_limit', 3))
         recipes = obj.recipes.all()[:limit]
         serializer = SubRecipeSerializer(
-            recipes, many=True, context={'request': request}
+            recipes, 
+            many=True, 
+            context={'request': request},
         )
         return serializer.data
 

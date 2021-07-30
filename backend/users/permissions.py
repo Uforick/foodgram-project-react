@@ -1,9 +1,15 @@
-from rest_framework.permissions import SAFE_METHODS, BasePermission
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 
 
-class IsOwnerOrAdmin(BasePermission):
+class AllowAnyGetPost(IsAuthenticated):
+    def has_permission(self, request, view):
+        if (request.method in SAFE_METHODS
+                or request.method == 'POST'):
+            return True
+        return False
+
+
+class CurrentUserOrAdmin(IsAuthenticated):
     def has_object_permission(self, request, view, obj):
         user = request.user
-        if request.method in SAFE_METHODS:
-            return True
         return user.is_superuser or obj.pk == user.pk
