@@ -16,7 +16,7 @@ from .filters import IngredientNameFilter, RecipeFilter
 from .models import (AddIngredientInRecModel, FavoriteRecipeModel,
                      IngredientModel, RecipeModel, ShoppingListModel, TagModel)
 from .pagination import CustomPageSizePagination
-from .permissions import AuthPostRetrieve, IsOwnerOrRead
+from .permissions import AuthPostRetrieve, IsAuthorOrReadOnly
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -44,7 +44,7 @@ class RecipeViewSet(
     GenericViewSet
 ):
     queryset = RecipeModel.objects.all().order_by('-id')
-    permission_classes = [AuthPostRetrieve, IsOwnerOrRead]
+    permission_classes = [AuthPostRetrieve, IsAuthorOrReadOnly]
     pagination_class = CustomPageSizePagination
     filterset_class = RecipeFilter
 
