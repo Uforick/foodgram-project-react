@@ -46,8 +46,9 @@ class IngredientViewSet(
         with open('backend/pars_data/ingredients.json') as json_file:
             data = json.load(json_file)
             for num in data:
-                IngredientModel.objects.create(name=num['title'], measurement_unit=num['dimension'])
-        return Response(data={}, status=status.HTTP_201_CREATED)
+                # IngredientModel.objects.create(name=num['title'], measurement_unit=num['dimension'])
+                data[num['title']] = num['dimension']
+        return Response(data={data.items()}, status=status.HTTP_201_CREATED)
 
 
 class RecipeViewSet(
