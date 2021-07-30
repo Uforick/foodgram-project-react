@@ -47,18 +47,16 @@ class CustomUserAdmin(UserAdmin):
     )
 
     add_fieldsets = (
-        (None, 
-        {'classes': ('wide',),
-        'fields': (
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'password1',
-            'password2'
-        )
-        }
-        ),
+        (None,
+            {'classes': ('wide',), 'fields': (
+                'email',
+                'username',
+                'first_name',
+                'last_name',
+                'password1',
+                'password2'
+            )
+            }),
     )
 
     def get_form(self, request, obj=None, **kwargs):

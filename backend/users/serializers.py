@@ -85,8 +85,8 @@ class FollowSerializer(serializers.ModelSerializer):
         limit = int(request.query_params.get('recipes_limit', 3))
         recipes = obj.recipes.all()[:limit]
         serializer = SubRecipeSerializer(
-            recipes, 
-            many=True, 
+            recipes,
+            many=True,
             context={'request': request},
         )
         return serializer.data

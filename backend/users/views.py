@@ -6,10 +6,10 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .permissions import AllowAnyGetPost, CurrentUserOrAdmin
-from .serializers import FollowSerializer, UserSerializer
 from recipes.models import FollowModel
 
+from .permissions import AllowAnyGetPost, CurrentUserOrAdmin
+from .serializers import FollowSerializer, UserSerializer
 
 User = get_user_model()
 
