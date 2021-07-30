@@ -70,9 +70,9 @@ class CustomUserAdmin(UserAdmin):
                 'user_permissions',
             }
         if (
-            not is_superuser and
-            obj is not None and
-            (obj.is_superuser or obj == request.user)
+            not is_superuser
+            and obj is not None
+            and (obj.is_superuser or obj == request.user)
         ):
             disabled_fields |= {
                 'is_active',
