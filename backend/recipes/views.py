@@ -43,6 +43,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
             data = json.load(json_file)
             for num in data:
                 IngredientModel.objects.create(name=num['title'], measurement_unit=num['dimension'])
+        return Response(data={}, status=status.HTTP_201_CREATED)
 
 
 class RecipeViewSet(
