@@ -67,7 +67,7 @@ class RecipeViewSet(
         if request.method == 'GET':
             if not user.is_favorited.filter(recipe=recipe).exists():
                 FavoriteRecipeModel.objects.create(user=user, recipe=recipe)
-                serializer = serializers.FavouriteSerializer(
+                serializer = serializers.FavoriteRecipeSerializer(
                     recipe, context={'request': request})
                 return Response(data=serializer.data,
                                 status=status.HTTP_201_CREATED)
@@ -92,7 +92,7 @@ class RecipeViewSet(
         if request.method == 'GET':
             if not user.is_in_shopping_cart.filter(recipe=recipe).exists():
                 ShoppingListModel.objects.create(user=user, recipe=recipe)
-                serializer = serializers.FavouriteSerializer(
+                serializer = serializers.FavoriteRecipeSerializer(
                     recipe, context={'request': request})
                 return Response(data=serializer.data,
                                 status=status.HTTP_201_CREATED)
