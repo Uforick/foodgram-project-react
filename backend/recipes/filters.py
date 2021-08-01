@@ -45,7 +45,7 @@ class RecipeFilter(FilterSet):
 
 
 class IngredientNameFilter(FilterSet):
-    name = CharFilter(field_name='name', lookup_expr='name__icontains')
+    name = CharFilter(field_name='name', lookup_expr='icontains')
 
     class Meta:
         model = Ingredient
