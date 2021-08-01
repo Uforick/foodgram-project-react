@@ -7,7 +7,7 @@ from recipes.models import Ingredient
 class Command(BaseCommand):
     help = 'Add new ingredients model from ingredients.json'
 
-    def handle(self):
+    def handle(self, *args, **options):
         with open('data/ingredients.json') as json_file:
             data = json.load(json_file)
             for num in data:
