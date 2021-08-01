@@ -4,7 +4,7 @@ from django.db import models
 User = get_user_model()
 
 
-class FollowModel(models.Model):
+class Follow(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -27,11 +27,9 @@ class FollowModel(models.Model):
         ]
 
 
-class TagModel(models.Model):
+class Tag(models.Model):
     name = models.CharField(
         max_length=15,
-        blank=False,
-        null=False,
         unique=True,
         verbose_name='Тег',
     )
@@ -55,7 +53,7 @@ class TagModel(models.Model):
         return self.name
 
 
-class IngredientModel(models.Model):
+class Ingredient(models.Model):
     name = models.CharField(
         max_length=200,
         verbose_name='Название',
@@ -75,7 +73,7 @@ class IngredientModel(models.Model):
         return self.name
 
 
-class RecipeModel(models.Model):
+class Recipe(models.Model):
     name = models.CharField(
         max_length=200,
         verbose_name='Название',
@@ -88,23 +86,20 @@ class RecipeModel(models.Model):
         verbose_name='Автор',
     )
     image = models.ImageField(
-        upload_to='static/recipes/',
-        blank=False,
+        upload_to='image/',
         verbose_name='Картинка',
     )
     text = models.TextField(
-        blank=False,
         verbose_name='Рецепт',
     )
     ingredients = models.ManyToManyField(
-        IngredientModel,
+        Ingredient,
         related_name='recipes',
-        through='AddIngredientInRecModel',
-        blank=False,
+        through='AddIngredientInRec',
         verbose_name='Ингредиенты',
     )
     tags = models.ManyToManyField(
-        TagModel,
+        Tag,
         related_name='recipes',
         verbose_name='Теги',
     )
@@ -121,15 +116,15 @@ class RecipeModel(models.Model):
         return self.name
 
 
-class AddIngredientInRecModel(models.Model):
+class AddIngredientInRec(models.Model):
     ingredient = models.ForeignKey(
-        IngredientModel,
+        Ingredient,
         on_delete=models.CASCADE,
         related_name='amounts',
         verbose_name='Ингридиент для рецепта',
     )
     recipe = models.ForeignKey(
-        RecipeModel,
+        Recipe,
         on_delete=models.CASCADE,
         related_name='amounts',
         verbose_name='Сам рецепт',
@@ -149,7 +144,7 @@ class AddIngredientInRecModel(models.Model):
         return f'{self.ingredient} {self.recipe}'
 
 
-class ShoppingListModel(models.Model):
+class ShoppingList(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -157,7 +152,7 @@ class ShoppingListModel(models.Model):
         verbose_name='Покупатель',
     )
     recipe = models.ForeignKey(
-        RecipeModel,
+        Recipe,
         on_delete=models.CASCADE,
         related_name='is_in_shopping_cart',
         verbose_name='Рецепт для покупки',
@@ -177,7 +172,7 @@ class ShoppingListModel(models.Model):
         return f'{self.recipe} {self.user}'
 
 
-class FavoriteRecipeModel(models.Model):
+class FavoriteRecipe(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -185,7 +180,7 @@ class FavoriteRecipeModel(models.Model):
         verbose_name='Пользователь',
     )
     recipe = models.ForeignKey(
-        RecipeModel,
+        Recipe,
         on_delete=models.CASCADE,
         related_name='is_favorited',
         verbose_name='Рецепт',

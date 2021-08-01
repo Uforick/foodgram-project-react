@@ -1,7 +1,7 @@
 from django_filters import CharFilter, FilterSet
 from django_filters.filters import BooleanFilter
 
-from .models import IngredientModel, RecipeModel
+from .models import Ingredient, Recipe
 
 
 class RecipeFilter(FilterSet):
@@ -10,7 +10,7 @@ class RecipeFilter(FilterSet):
     is_in_shopping_cart = BooleanFilter(method='filter_is_in_shopping_cart')
 
     class Meta:
-        model = RecipeModel
+        model = Recipe
         fields = ('is_favorited', 'is_in_shopping_cart', 'author', 'tags')
 
     def filter_tags(self, queryset, slug, tags):
@@ -23,9 +23,8 @@ class RecipeFilter(FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
-        bool_dict = {'true': True, 'false': False}
         is_favorited = self.request.query_params.get('is_favorited', False)
-        if bool_dict.get(is_favorited, False):
+        if is_favorited is None:
             return queryset.filter(
                 is_favorited__user=self.request.user
             ).distinct()
@@ -35,11 +34,10 @@ class RecipeFilter(FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
-        bool_dict = {'true': True, 'false': False}
         is_favorited = self.request.query_params.get(
             'is_in_shopping_cart', False
         )
-        if bool_dict.get(is_favorited, False):
+        if is_favorited is None:
             return queryset.filter(
                 is_in_shopping_cart__user=self.request.user
             ).distinct()
@@ -47,11 +45,8 @@ class RecipeFilter(FilterSet):
 
 
 class IngredientNameFilter(FilterSet):
-    name = CharFilter(field_name='name', method='name_starts_with')
+    name = CharFilter(field_name='name', lookup_expr='name__icontains')
 
     class Meta:
-        model = IngredientModel
+        model = Ingredient
         fields = ('name',)
-
-    def name_starts_with(self, queryset, slug, name):
-        return queryset.filter(name__startswith=name)

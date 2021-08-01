@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from recipes.models import RecipeModel
+from recipes.models import Recipe
 
 User = get_user_model()
 
@@ -40,7 +40,7 @@ class FollowRecipeSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = RecipeModel
+        model = Recipe
         fields = (
             'id',
             'name',
@@ -51,8 +51,8 @@ class FollowRecipeSerializer(serializers.ModelSerializer):
 
 class SubRecipeSerializer(serializers.ModelSerializer):
 
-    class Meta():
-        model = RecipeModel
+    class Meta:
+        model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
@@ -89,6 +89,7 @@ class FollowSerializer(serializers.ModelSerializer):
             many=True,
             context={'request': request},
         )
+        serializer.is_valid()
         return serializer.data
 
     def get_recipes_count(self, obj):

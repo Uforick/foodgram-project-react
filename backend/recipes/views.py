@@ -13,21 +13,21 @@ from rest_framework.viewsets import (GenericViewSet, ReadOnlyModelViewSet,
 
 from . import serializers
 from .filters import IngredientNameFilter, RecipeFilter
-from .models import (AddIngredientInRecModel, FavoriteRecipeModel,
-                     IngredientModel, RecipeModel, ShoppingListModel, TagModel)
+from .models import (AddIngredientInRec, FavoriteRecipe, Ingredient, Recipe,
+                     ShoppingList, Tag)
 from .pagination import CustomPageSizePagination
 from .permissions import AuthPostRetrieve, IsAuthorOrReadOnly
 
 
 class TagViewSet(ReadOnlyModelViewSet):
-    queryset = TagModel.objects.all()
+    queryset = Tag.objects.all()
     serializer_class = serializers.TagSerializer
     permission_classes = [AllowAny]
     pagination_class = None
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
-    queryset = IngredientModel.objects.all()
+    queryset = Ingredient.objects.all()
     permission_classes = AllowAny
     serializer_class = serializers.IngredientReadSerializer
     permission_classes = [AllowAny]
@@ -43,7 +43,7 @@ class RecipeViewSet(
     mixins.UpdateModelMixin,
     GenericViewSet
 ):
-    queryset = RecipeModel.objects.all().order_by('-id')
+    queryset = Recipe.objects.all().order_by('-id')
     permission_classes = [AuthPostRetrieve, IsAuthorOrReadOnly]
     pagination_class = CustomPageSizePagination
     filterset_class = RecipeFilter
@@ -62,13 +62,14 @@ class RecipeViewSet(
         permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, pk):
-        recipe = get_object_or_404(RecipeModel, pk=pk)
+        recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
         if request.method == 'GET':
             if not user.is_favorited.filter(recipe=recipe).exists():
-                FavoriteRecipeModel.objects.create(user=user, recipe=recipe)
+                FavoriteRecipe.objects.create(user=user, recipe=recipe)
                 serializer = serializers.FavoriteRecipeSerializer(
                     recipe, context={'request': request})
+                serializer.is_valid()
                 return Response(data=serializer.data,
                                 status=status.HTTP_201_CREATED)
             data = {
@@ -80,20 +81,21 @@ class RecipeViewSet(
                 'errors': 'Этого рецепта не было в вашем избранном'
             }
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        FavoriteRecipeModel.objects.filter(user=user, recipe=recipe).delete()
+        FavoriteRecipe.objects.filter(user=user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True,
             methods=['get', 'delete'],
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk):
-        recipe = get_object_or_404(RecipeModel, pk=pk)
+        recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
         if request.method == 'GET':
             if not user.is_in_shopping_cart.filter(recipe=recipe).exists():
-                ShoppingListModel.objects.create(user=user, recipe=recipe)
+                ShoppingList.objects.create(user=user, recipe=recipe)
                 serializer = serializers.FavoriteRecipeSerializer(
                     recipe, context={'request': request})
+                serializer.is_valid()
                 return Response(data=serializer.data,
                                 status=status.HTTP_201_CREATED)
             data = {
@@ -105,7 +107,7 @@ class RecipeViewSet(
                 'errors': 'Этого рецепта не было в вашем списке покупок'
             }
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        ShoppingListModel.objects.filter(user=user, recipe=recipe).delete()
+        ShoppingList.objects.filter(user=user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -119,7 +121,7 @@ class RecipeViewSet(
         shopping_list = {}
         for item in shopping_cart:
             recipe = item.recipe
-            ingredients = AddIngredientInRecModel.objects.filter(recipe=recipe)
+            ingredients = AddIngredientInRec.objects.filter(recipe=recipe)
             for ingredient in ingredients:
                 name = ingredient.ingredient.name
                 measurement_unit = ingredient.ingredient.measurement_unit

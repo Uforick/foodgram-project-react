@@ -10,7 +10,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY'),
 
 DEBUG = True
 
-# ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', 'backend', '178.154.222.48']
 ALLOWED_HOSTS = ['*']
 
 CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
@@ -63,14 +62,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 
-# if DEBUG:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.sqlite3',
-#             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#         }
-#     }
-# else:
+
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('DB_ENGINE'),
