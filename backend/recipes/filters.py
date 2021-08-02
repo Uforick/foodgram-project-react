@@ -23,7 +23,7 @@ class RecipeFilter(FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
-        is_favorited = self.request.query_params.get('is_favorited', False)
+        is_favorited = self.request.query_params.get('is_favorited')
         if is_favorited is None:
             return queryset.filter(
                 is_favorited__user=self.request.user
@@ -34,10 +34,10 @@ class RecipeFilter(FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
-        is_favorited = self.request.query_params.get(
-            'is_in_shopping_cart', False
+        is_in_shopping_cart = self.request.query_params.get(
+            'is_in_shopping_cart',
         )
-        if is_favorited is None:
+        if is_in_shopping_cart is None:
             return queryset.filter(
                 is_in_shopping_cart__user=self.request.user
             ).distinct()

@@ -11,4 +11,7 @@ class Command(BaseCommand):
         with open('data/ingredients.json') as json_file:
             data = json.load(json_file)
             for num in data:
-                Ingredient.objects.create(name=num['title'], measurement_unit=num['dimension'],)
+                Ingredient.objects.create(
+                    name=num['title'],
+                    measurement_unit=num['dimension'],
+                )

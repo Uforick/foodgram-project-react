@@ -59,28 +59,24 @@ class RecipeViewSet(
     @action(
         detail=True,
         methods=['get', 'delete'],
-        permission_classes=[IsAuthenticated]
+        permission_classes=[IsAuthenticated],
+
     )
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
+        data = {'user': user.pk, 'recipe': recipe, 'method': 'is_favorited'}
+        serializer = serializers.FavoriteRecipeSerializer(
+            data=data,
+            context={'request': request},
+        )
         if request.method == 'GET':
-            if not user.is_favorited.filter(recipe=recipe).exists():
-                FavoriteRecipe.objects.create(user=user, recipe=recipe)
-                serializer = serializers.FavoriteRecipeSerializer(
-                    recipe, context={'request': request})
-                serializer.is_valid()
-                return Response(data=serializer.data,
-                                status=status.HTTP_201_CREATED)
-            data = {
-                'errors': 'Этот рецепт уже есть в избранном'
-            }
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        if not user.is_favorited.filter(recipe=recipe).exists():
-            data = {
-                'errors': 'Этого рецепта не было в вашем избранном'
-            }
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
         FavoriteRecipe.objects.filter(user=user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -90,23 +86,18 @@ class RecipeViewSet(
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
+        data = {'user': user.pk, 'recipe': recipe, 'method': 'is_in_shopping_cart'}
+        serializer = serializers.FavoriteRecipeSerializer(
+            data=data,
+            context={'request': request},
+        )
         if request.method == 'GET':
-            if not user.is_in_shopping_cart.filter(recipe=recipe).exists():
-                ShoppingList.objects.create(user=user, recipe=recipe)
-                serializer = serializers.FavoriteRecipeSerializer(
-                    recipe, context={'request': request})
-                serializer.is_valid()
-                return Response(data=serializer.data,
-                                status=status.HTTP_201_CREATED)
-            data = {
-                'errors': 'Этот рецепт уже есть в списке покупок'
-            }
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        if not user.is_in_shopping_cart.filter(recipe=recipe).exists():
-            data = {
-                'errors': 'Этого рецепта не было в вашем списке покупок'
-            }
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
         ShoppingList.objects.filter(user=user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

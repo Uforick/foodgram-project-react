@@ -22,7 +22,6 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
-        serializer.is_valid()
         serializer.save()
         user = get_object_or_404(User, username=username)
         user.set_password(password)
@@ -62,12 +61,10 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = FollowSerializer(
                 page, many=True, context={'request': request}
             )
-            serializer.is_valid()
             return self.get_paginated_response(serializer.data)
         serializer = FollowSerializer(
             page, many=True, context={'request': request}
         )
-        serializer.is_valid()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True,
@@ -84,7 +81,6 @@ class UserViewSet(viewsets.ModelViewSet):
                     author,
                     context={'request': request}
                 )
-                serializer.is_valid()
                 return Response(data=serializer.data,
                                 status=status.HTTP_201_CREATED)
             data = {

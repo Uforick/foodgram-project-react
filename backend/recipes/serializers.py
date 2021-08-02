@@ -35,6 +35,33 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = fields = ('id', 'name', 'image', 'cooking_time')
 
+    def validate(self, attrs):
+        user = self.context.get('request').user
+        recipe = attrs['recipe']
+        method = attrs['method']
+        method_ask = {
+            'is_favorited': {
+                'check': user.is_favorited.filter(recipe=recipe).exists(),
+                'text_error_get': 'Этот рецепт уже есть в избранном',
+                'text_error_delete': 'Этого рецепта не было в вашем избранном'
+            },
+            'is_in_shopping_cart': {
+                'check': user.is_in_shopping_cart.filter(recipe=recipe).exists(),
+                'text_error_get': 'Этот рецепт уже есть в списке покупок',
+                'text_error_delete': 'Этого рецепта не было в вашем списке покупок',
+            }
+        }
+
+        if (self.context.get('request').method == 'GET'
+        and method_ask[method]['check']):
+            raise serializers.ValidationError(method_ask[method]['text_error_get'])
+
+        if (self.context.get('request').method == 'DELETE'
+        and not method_ask[method]['check']):
+            raise serializers.ValidationError(method_ask[method]['text_error_delete'])
+
+        return attrs
+
 
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
