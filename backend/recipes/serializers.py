@@ -203,3 +203,5 @@ class FavoriteSerializer(serializers.ModelSerializer):
             and not user.is_favorited.filter(recipe=recipe).exists()):
             raise serializers.ValidationError(
                 'Этого рецепта не было в вашем избранном')
+
+        return obj
