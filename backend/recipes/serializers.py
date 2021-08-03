@@ -39,7 +39,7 @@ class FavoriteRecipeSerializer(ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = fields = ('id', 'name', 'image', 'cooking_time')
+        fields = ('id', 'name', 'image', 'cooking_time')
 
     def validate(self, attrs):
         user = self.context.get('request').user
@@ -88,7 +88,7 @@ class RecipeIngredientReadSerializer(ModelSerializer):
 
 class RecipeReadSerializer(ModelSerializer):
     author = UserSerializer(read_only=True)
-    ingredients = RecipeIngredientReadSerializer(source='amounts', many=True)
+    ingredients = RecipeIngredientReadSerializer()
     tags = TagSerializer(many=True, read_only=True)
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()
