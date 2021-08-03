@@ -33,7 +33,7 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = fields = ('id', 'name', 'image', 'cooking_time')
+        fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
@@ -82,6 +82,20 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         if not user.is_authenticated:
             return False
         return obj.is_in_shopping_cart.filter(user=user).exists()
+
+    def validate(self, obj):
+        user = self.context['request'].user
+        recipe = obj['recipe']
+
+        if (self.context.get('request').method == 'GET'
+            and user.is_favorited.filter(recipe=recipe).exists()):
+            raise serializers.ValidationError(
+                'Этот рецепт уже есть в избранном')
+
+        if (self.context.get('request').method == 'DELETE'
+            and not user.is_favorited.filter(recipe=recipe).exists()):
+            raise serializers.ValidationError(
+                'Этого рецепта не было в вашем избранном')
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
