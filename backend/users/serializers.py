@@ -78,24 +78,24 @@ class FollowSerializer(SerializerMethodField):
             'recipes_count',
         )
 
-    def validate(self, attrs):
-        user = self.context.get('request').user
-        author = attrs['author']
-        if (self.context.get('request').method == 'GET'
-            and (author == user
-            or user.subscribed_on.filter(author=author).exists())):
-            raise ValidationError(
-                'Вы или уже подписаны на этого автора, '
-                'или пытаетесь подписаться на себя, что невозможно')
+    # def validate(self, attrs):
+    #     user = self.context.get('request').user
+    #     author = attrs['author']
+    #     if (self.context.get('request').method == 'GET'
+    #         and (author == user
+    #         or user.subscribed_on.filter(author=author).exists())):
+    #         raise ValidationError(
+    #             'Вы или уже подписаны на этого автора, '
+    #             'или пытаетесь подписаться на себя, что невозможно')
 
-        if (self.context.get('request').method == 'DELETE'
-            and not user.subscribed_on.filter(author=author).exists()):
-            raise ValidationError(
-                'Вы не подписаны на данного автора '
-                '(напоминание: на себя подписаться невозможно)'
-            )
+    #     if (self.context.get('request').method == 'DELETE'
+    #         and not user.subscribed_on.filter(author=author).exists()):
+    #         raise ValidationError(
+    #             'Вы не подписаны на данного автора '
+    #             '(напоминание: на себя подписаться невозможно)'
+    #         )
 
-        return attrs
+    #     return attrs
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
