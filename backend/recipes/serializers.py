@@ -4,7 +4,14 @@ from rest_framework.generics import get_object_or_404
 from users.serializers import UserSerializer
 
 from .fields import Base64ImageField
-from .models import AddIngredientInRec, Ingredient, Recipe, Tag
+from .models import (
+    AddIngredientInRec,
+    Ingredient,
+    Recipe,
+    Tag,
+    FavoriteRecipe,
+    User
+)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -82,20 +89,6 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         if not user.is_authenticated:
             return False
         return obj.is_in_shopping_cart.filter(user=user).exists()
-
-    def validate(self, obj):
-        user = self.context['request'].user
-        recipe = obj['recipe']
-
-        if (self.context.get('request').method == 'GET'
-            and user.is_favorited.filter(recipe=recipe).exists()):
-            raise serializers.ValidationError(
-                'Этот рецепт уже есть в избранном')
-
-        if (self.context.get('request').method == 'DELETE'
-            and not user.is_favorited.filter(recipe=recipe).exists()):
-            raise serializers.ValidationError(
-                'Этого рецепта не было в вашем избранном')
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
@@ -184,3 +177,29 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')}
         ).data
         return data
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    class Meta:
+        model = FavoriteRecipe
+        fields = (
+            'user',
+            'recipe'
+        )
+
+    def validate(self, obj):
+        user = self.context['request'].user
+        recipe = obj['recipe']
+
+        if (self.context.get('request').method == 'GET'
+            and user.is_favorited.filter(recipe=recipe).exists()):
+            raise serializers.ValidationError(
+                'Этот рецепт уже есть в избранном')
+
+        if (self.context.get('request').method == 'DELETE'
+            and not user.is_favorited.filter(recipe=recipe).exists()):
+            raise serializers.ValidationError(
+                'Этого рецепта не было в вашем избранном')

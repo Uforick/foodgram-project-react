@@ -68,22 +68,23 @@ class RecipeViewSet(
             'user': user.id,
             'recipe': recipe,
         }
-        serializer = serializers.RecipeReadSerializer(
+        serializer = serializers.FavoriteSerializer(
             data=data,
             context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
         if request.method == 'GET':
             FavoriteRecipe.objects.create(user=user, recipe=recipe)
-            serializer = serializers.FavoriteRecipeSerializer(
-                recipe, context={'request': request})
             serializer.save()
             return Response(
                 data=serializer.data,
                 status=status.HTTP_201_CREATED
             )
-        FavoriteRecipe.objects.filter(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'DELETE':
+            FavoriteRecipe.objects.filter(user=user, recipe=recipe).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(detail=True,
             methods=['get', 'delete'],
