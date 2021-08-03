@@ -62,18 +62,17 @@ class RecipeViewSet(
         permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, pk):
-        recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
-        data = {
-            'user': user.pk,
-            'recipe': recipe.pk,
-        }
-        serializer = serializers.FavoriteSerializer(
-            data=data,
-            context={'request': request}
-        )
+
         if request.method == 'GET':
-            FavoriteRecipe.objects.create(user=user, recipe=recipe)
+            data = {
+                'user': user.id,
+                'recipe': pk,
+            }
+            serializer = serializers.FavoriteSerializer(
+                data=data,
+                context={'request': request}
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
@@ -81,6 +80,7 @@ class RecipeViewSet(
                 status=status.HTTP_201_CREATED
             )
         if request.method == 'DELETE':
+            recipe = get_object_or_404(Recipe, pk=pk)
             FavoriteRecipe.objects.filter(user=user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
