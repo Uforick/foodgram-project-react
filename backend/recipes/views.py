@@ -79,6 +79,7 @@ class RecipeViewSet(
                 data=serializer.data,
                 status=status.HTTP_201_CREATED
             )
+            
         if request.method == 'DELETE':
             recipe = get_object_or_404(Recipe, pk=pk)
             FavoriteRecipe.objects.filter(user=user, recipe=recipe).delete()
