@@ -43,7 +43,7 @@ class FavoriteRecipeSerializer(ModelSerializer):
 
     def validate(self, attrs):
         user = self.context.get('request').user
-        recipe = attrs['recipe']
+        recipe = attrs['recipe'].pk
         method = attrs['method']
         method_ask = {
             'is_favorited': {
