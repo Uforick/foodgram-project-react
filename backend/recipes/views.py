@@ -65,7 +65,11 @@ class RecipeViewSet(
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
-        data = {'user': user.pk, 'recipe': recipe.pk, 'method': 'is_favorited'}
+        data = {
+            'user': user.pk,
+            'recipe': recipe.pk,
+            'method': 'is_favorited',
+        }
         serializer = serializers.FavoriteRecipeSerializer(
             data=data,
             context={'request': request},
@@ -88,7 +92,7 @@ class RecipeViewSet(
         user = request.user
         data = {
             'user': user.pk,
-            'recipe': recipe.pk,
+            'recipe': recipe,
             'method': 'is_in_shopping_cart'
         }
         serializer = serializers.FavoriteRecipeSerializer(
