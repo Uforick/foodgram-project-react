@@ -91,7 +91,7 @@ class RecipeViewSet(
                 context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
-            FavoriteRecipe.objects.filter(user=user, recipe=recipe).delete()
+            FavoriteRecipe.objects.get(user=user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
