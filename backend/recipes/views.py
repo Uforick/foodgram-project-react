@@ -72,9 +72,9 @@ class RecipeViewSet(
             data=data,
             context={'request': request}
         )
-        serializer.is_valid(raise_exception=True)
         if request.method == 'GET':
             FavoriteRecipe.objects.create(user=user, recipe=recipe)
+            serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
                 data=serializer.data,
