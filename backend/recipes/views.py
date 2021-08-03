@@ -63,12 +63,13 @@ class RecipeViewSet(
     )
     def favorite(self, request, pk):
         user = request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+        data = {
+            'user': user.id,
+            'recipe': pk,
+        }
 
         if request.method == 'GET':
-            data = {
-                'user': user.id,
-                'recipe': pk,
-            }
             serializer = serializers.FavoriteSerializer(
                 data=data,
                 context={'request': request}
@@ -81,7 +82,11 @@ class RecipeViewSet(
             )
 
         if request.method == 'DELETE':
-            recipe = get_object_or_404(Recipe, pk=pk)
+            serializer = serializers.FavoriteSerializer(
+                data=data,
+                context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
             FavoriteRecipe.objects.filter(user=user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
