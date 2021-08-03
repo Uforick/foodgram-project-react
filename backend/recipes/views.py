@@ -75,11 +75,7 @@ class RecipeViewSet(
                 context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
-            serializer.save()
-            serializer = serializers.FavoriteRecipeSerializer(
-                recipe,
-                context={'request': request}
-            )
+            FavoriteRecipe.objects.create(user=user, recipe=recipe)
             return Response(
                 data=serializer.data,
                 status=status.HTTP_201_CREATED
@@ -107,7 +103,6 @@ class RecipeViewSet(
                 ShoppingList.objects.create(user=user, recipe=recipe)
                 serializer = serializers.FavoriteRecipeSerializer(
                     recipe, context={'request': request})
-                serializer.is_valid()
                 return Response(data=serializer.data,
                                 status=status.HTTP_201_CREATED)
             data = {
