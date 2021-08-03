@@ -68,26 +68,25 @@ class RecipeViewSet(
             'user': user.id,
             'recipe': pk,
         }
-
-        if request.method == 'GET':
-            serializer = serializers.FavoriteSerializer(
-                data=data,
+        serializer = serializers.FavoriteSerializer(
+            data=data,
+            context={'request': request}
+        )
+        if (request.method == 'GET'
+            and serializer.is_valid(raise_exception=True)):
+            FavoriteRecipe.objects.create(user=user, recipe=recipe)
+            serializer = serializers.FavoriteRecipeSerializer(
+                recipe,
                 context={'request': request}
             )
-            serializer.is_valid(raise_exception=True)
-            FavoriteRecipe.objects.create(user=user, recipe=recipe)
             return Response(
                 data=serializer.data,
                 status=status.HTTP_201_CREATED
             )
 
-        if request.method == 'DELETE':
-            serializer = serializers.FavoriteSerializer(
-                data=data,
-                context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            FavoriteRecipe.objects.get(user=user, recipe=recipe).delete()
+        if (request.method == 'DELETE'
+            and serializer.is_valid(raise_exception=True)):
+            FavoriteRecipe.objects.filter(user=user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
