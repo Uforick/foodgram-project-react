@@ -42,7 +42,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def set_password(self, request, *args, **kwargs):
         serializer = SetPasswordSerializer(
             data=request.data,
-            context={'request': request}
+            context={'request': request},
         )
         serializer.is_valid(raise_exception=True)
         new_password = serializer.validated_data['new_password']
@@ -59,13 +59,20 @@ class UserViewSet(viewsets.ModelViewSet):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = FollowSerializer(
-                page, many=True, context={'request': request}
+                page,
+                many=True,
+                context={'request': request},
             )
             return self.get_paginated_response(serializer.data)
         serializer = FollowSerializer(
-            page, many=True, context={'request': request}
+            page,
+            many=True,
+            context={'request': request},
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=True,
             methods=['get', 'delete'],
