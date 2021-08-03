@@ -62,11 +62,11 @@ class RecipeViewSet(
         permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, pk):
-        recipe = get_object_or_404(Recipe, pk=pk).pk
+        recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
         data = {
-            'user': user.id,
-            'recipe': recipe,
+            'user': user.pk,
+            'recipe': recipe.pk,
         }
         serializer = serializers.FavoriteSerializer(
             data=data,
