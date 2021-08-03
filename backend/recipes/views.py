@@ -76,6 +76,10 @@ class RecipeViewSet(
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
+            serializer = serializers.FavoriteRecipeSerializer(
+                recipe,
+                context={'request': request}
+            )
             return Response(
                 data=serializer.data,
                 status=status.HTTP_201_CREATED
