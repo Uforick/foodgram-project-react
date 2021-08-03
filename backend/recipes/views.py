@@ -62,7 +62,7 @@ class RecipeViewSet(
         permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, pk):
-        recipe = get_object_or_404(Recipe, pk=pk)
+        recipe = get_object_or_404(Recipe, pk=pk).pk
         user = request.user
         data = {
             'user': user.id,
