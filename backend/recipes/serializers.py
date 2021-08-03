@@ -192,7 +192,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
     def validate(self, obj):
         user = self.context['request'].user
-        recipe = obj['recipe'].pk
+        recipe = obj['recipe']
 
         if (self.context.get('request').method == 'GET'
             and user.is_favorited.filter(recipe=recipe).exists()):
