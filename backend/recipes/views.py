@@ -97,24 +97,32 @@ class RecipeViewSet(
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
-        if request.method == 'GET':
-            if not user.is_in_shopping_cart.filter(recipe=recipe).exists():
-                ShoppingList.objects.create(user=user, recipe=recipe)
-                serializer = serializers.FavoriteRecipeSerializer(
-                    recipe, context={'request': request})
-                return Response(data=serializer.data,
-                                status=status.HTTP_201_CREATED)
-            data = {
-                'errors': 'Этот рецепт уже есть в списке покупок'
-            }
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        if not user.is_in_shopping_cart.filter(recipe=recipe).exists():
-            data = {
-                'errors': 'Этого рецепта не было в вашем списке покупок'
-            }
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        ShoppingList.objects.filter(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        data = {
+            'user': user.id,
+            'recipe': pk,
+        }
+        serializer = serializers.ShoppingCartSerializer(
+            data=data,
+            context={'request': request}
+        )
+        if (request.method == 'GET'
+            and serializer.is_valid(raise_exception=True)):
+            ShoppingList.objects.create(user=user, recipe=recipe)
+            serializer = serializers.FavoriteRecipeSerializer(
+                recipe,
+                context={'request': request}
+            )
+            return Response(
+                data=serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        if (request.method == 'DELETE'
+            and serializer.is_valid(raise_exception=True)):
+            ShoppingList.objects.filter(user=user, recipe=recipe).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(
         detail=False,
