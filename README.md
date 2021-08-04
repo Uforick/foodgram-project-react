@@ -51,4 +51,5 @@ docker-compose exec backend python manage.py collectstatic --no-input
 админка:http://warmspace.ru/admin/ 
 admin admin
 admin@ad.com
+---
 Авторство github.com/Uforick
