@@ -23,9 +23,10 @@ class IngredientReadSerializer(serializers.ModelSerializer):
 
 
 class IngredientWriteSerializer(serializers.ModelSerializer):
+    amount = serializers.IntegerField()
 
     class Meta:
-        model = AddIngredientInRec
+        model = Ingredient
         fields = ('id', 'amount')
 
 
