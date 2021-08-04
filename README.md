@@ -45,7 +45,9 @@ docker-compose exec backend python manage.py collectstatic --no-input
 ```
 ---
 ![example workflow](https://github.com/Uforick/foodgram-project-react/actions/workflows/Foodgram_workflow.yml/badge.svg)
+
 Доступно по адресу http://warmspace.ru/ 178.154.222.48
+
 админка:http://warmspace.ru/admin/ 
 admin admin
 admin@ad.com
