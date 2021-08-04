@@ -10,7 +10,7 @@ from .models import (
     Recipe,
     Tag,
     FavoriteRecipe,
-    # User
+    User
 )
 
 
