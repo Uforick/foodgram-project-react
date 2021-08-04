@@ -88,7 +88,6 @@ class FollowSerializer(serializers.ModelSerializer):
             many=True,
             context={'request': request},
         )
-        serializer.is_valid()
         return serializer.data
 
     def get_recipes_count(self, obj):
