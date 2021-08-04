@@ -9,11 +9,7 @@ from rest_framework.response import Response
 from recipes.models import Follow
 
 from .permissions import AllowAnyGetPost, CurrentUserOrAdmin
-from .serializers import (
-    FollowSerializer,
-    UserSerializer,
-    SubscribeSerializer
-)
+from .serializers import FollowSerializer, SubscribeSerializer, UserSerializer
 
 User = get_user_model()
 
