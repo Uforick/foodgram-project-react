@@ -23,6 +23,7 @@ class IngredientReadSerializer(serializers.ModelSerializer):
 
 
 class IngredientWriteSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
     amount = serializers.IntegerField()
 
     class Meta:
