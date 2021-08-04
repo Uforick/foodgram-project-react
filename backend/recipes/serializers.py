@@ -205,3 +205,31 @@ class FavoriteSerializer(serializers.ModelSerializer):
                 'Этого рецепта не было в вашем избранном')
 
         return obj
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    class Meta:
+        model = FavoriteRecipe
+        fields = (
+            'user',
+            'recipe'
+        )
+
+    def validate(self, obj):
+        user = self.context['request'].user
+        recipe = obj['recipe']
+
+        if (self.context.get('request').method == 'GET'
+            and user.is_in_shopping_cart.filter(recipe=recipe).exists()):
+            raise serializers.ValidationError(
+                'Этот рецепт уже есть в списке покупок')
+
+        if (self.context.get('request').method == 'DELETE'
+            and not user.is_in_shopping_cart.filter(recipe=recipe).exists()):
+            raise serializers.ValidationError(
+                'Этого рецепта не было в вашем списке покупок')
+
+        return obj
