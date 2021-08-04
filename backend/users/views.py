@@ -74,8 +74,8 @@ class UserViewSet(viewsets.ModelViewSet):
         author = get_object_or_404(User, pk=pk)
         user = request.user
         data = {
-            'user': user,
-            'author': author,
+            'user': user.pk,
+            'author': author.pk,
         }
         serializer = SubscribeSerializer(
             data=data,
