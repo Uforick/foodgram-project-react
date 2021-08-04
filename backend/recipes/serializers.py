@@ -4,14 +4,8 @@ from rest_framework.generics import get_object_or_404
 from users.serializers import UserSerializer
 
 from .fields import Base64ImageField
-from .models import (
-    AddIngredientInRec,
-    Ingredient,
-    Recipe,
-    Tag,
-    FavoriteRecipe,
-    User
-)
+from .models import (AddIngredientInRec, FavoriteRecipe, Ingredient, Recipe,
+                     Tag, User)
 
 
 class TagSerializer(serializers.ModelSerializer):

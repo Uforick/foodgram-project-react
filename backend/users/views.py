@@ -9,7 +9,11 @@ from rest_framework.response import Response
 from recipes.models import Follow
 
 from .permissions import AllowAnyGetPost, CurrentUserOrAdmin
-from .serializers import FollowSerializer, UserSerializer
+from .serializers import (
+    FollowSerializer,
+    UserSerializer,
+    SubscribeSerializer
+)
 
 User = get_user_model()
 
@@ -62,12 +66,10 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = FollowSerializer(
                 page, many=True, context={'request': request}
             )
-            serializer.is_valid()
             return self.get_paginated_response(serializer.data)
         serializer = FollowSerializer(
             page, many=True, context={'request': request}
         )
-        serializer.is_valid()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True,
@@ -76,27 +78,29 @@ class UserViewSet(viewsets.ModelViewSet):
     def subscribe(self, request, pk):
         author = get_object_or_404(User, pk=pk)
         user = request.user
-        subscribed = user.subscribed_on.filter(author=author).exists()
-        if request.method == 'GET':
-            if author != user and not subscribed:
-                Follow.objects.create(user=user, author=author)
-                serializer = UserSerializer(
-                    author,
-                    context={'request': request}
-                )
-                serializer.is_valid()
-                return Response(data=serializer.data,
-                                status=status.HTTP_201_CREATED)
-            data = {
-                'errors': ('Вы или уже подписаны на этого автора, '
-                           'или пытаетесь подписаться на себя, что невозможно')
-            }
-            return Response(data=data, status=status.HTTP_403_FORBIDDEN)
-        if not user.subscribed_on.filter(author=author).exists():
-            data = {
-                'errors': ('Вы не подписаны на данного автора '
-                           '(напоминание: на себя подписаться невозможно)')
-            }
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        Follow.objects.filter(user=user, author=author).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        data = {
+            'user': user,
+            'author': author,
+        }
+        serializer = SubscribeSerializer(
+            data=data,
+            context={'request': request}
+        )
+        if (request.method == 'GET'
+            and serializer.is_valid(raise_exception=True)):
+            Follow.objects.create(user=user, author=author)
+            serializer = UserSerializer(
+                author,
+                context={'request': request}
+            )
+            return Response(
+                data=serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        if (request.method == 'DELETE'
+            and serializer.is_valid(raise_exception=True)):
+            Follow.objects.filter(user=user, author=author).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
