@@ -23,8 +23,9 @@ class RecipeFilter(FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
-        is_favorited = self.request.query_params.get('is_favorited')
-        if is_favorited is None:
+        bool_dict = {'true': True, 'false': False}
+        is_favorited = self.request.query_params.get('is_favorited', False)
+        if bool_dict.get(is_favorited, False):
             return queryset.filter(
                 is_favorited__user=self.request.user
             ).distinct()
@@ -34,8 +35,12 @@ class RecipeFilter(FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
-        is_favorited = self.request.query_params.get('is_in_shopping_cart')
-        if is_favorited is None:
+        bool_dict = {'true': True, 'false': False}
+        is_favorited = self.request.query_params.get(
+            'is_in_shopping_cart',
+            False,
+        )
+        if bool_dict.get(is_favorited, False):
             return queryset.filter(
                 is_in_shopping_cart__user=self.request.user
             ).distinct()
