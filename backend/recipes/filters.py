@@ -23,9 +23,8 @@ class RecipeFilter(FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
-        bool_dict = {'true': True, 'false': False}
-        is_favorited = self.request.query_params.get('is_favorited', False)
-        if bool_dict.get(is_favorited, False):
+        is_favorited = self.request.query_params.get('is_favorited')
+        if not is_favorited:
             return queryset.filter(
                 is_favorited__user=self.request.user
             ).distinct()
