@@ -22,7 +22,6 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
-        serializer.is_valid()
         serializer.save()
         user = get_object_or_404(User, username=username)
         user.set_password(password)
@@ -45,7 +44,7 @@ class UserViewSet(viewsets.ModelViewSet):
             data=request.data,
             context={'request': request}
         )
-        serializer.is_valid(raise_exception=True)
+        serializer.is_valid()
         new_password = serializer.validated_data['new_password']
         self.request.user.set_password(new_password)
         self.request.user.save()
@@ -83,7 +82,7 @@ class UserViewSet(viewsets.ModelViewSet):
             context={'request': request}
         )
         if (request.method == 'GET'
-            and serializer.is_valid(raise_exception=True)):
+            and serializer.is_valid()):
             Follow.objects.create(user=user, author=author)
             serializer = UserSerializer(
                 author,
@@ -95,7 +94,7 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         if (request.method == 'DELETE'
-            and serializer.is_valid(raise_exception=True)):
+            and serializer.is_valid()):
             Follow.objects.filter(user=user, author=author).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
