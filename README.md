@@ -10,7 +10,7 @@
 - Python 3.8.5
 - Git (GitHub repository)
 - Docker (Docker hub repository)
-- Всяческая sparkles магия sparkles (подробнее в requirements.txt)
+- Всяческая магия (подробнее в requirements.txt)
 --- 
 
 ### Установка и запуск - давайте начнем:
